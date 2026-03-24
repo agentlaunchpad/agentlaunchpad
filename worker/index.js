@@ -2,7 +2,9 @@
 // Handles POST /api/waitlist and GET /api/admin/signups
 // Connects to Neon Postgres via HTTP (serverless driver)
 
-const NEON_CONNECTION_STRING = 'postgresql://neondb_owner:npg_5aZu8FAtksBX@ep-polished-tooth-alxdyjd7-pooler.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require';
+// Connection string must be set as environment variable (wrangler secret)
+// NEVER hardcode credentials in source code
+const NEON_CONNECTION_STRING = typeof NEON_DATABASE_URL !== 'undefined' ? NEON_DATABASE_URL : '';
 const ADMIN_TOKEN = 'alp-admin-2026-xK9m'; // Simple bearer token for admin endpoint
 const RATE_LIMIT_WINDOW = 60000; // 1 minute
 const RATE_LIMIT_MAX = 5; // max signups per IP per minute
@@ -30,7 +32,8 @@ function corsHeaders(origin) {
 }
 
 async function neonQuery(sql, params = []) {
-  const url = `https://ep-polished-tooth-alxdyjd7-pooler.c-3.eu-central-1.aws.neon.tech/sql`;
+  const host = new URL(NEON_CONNECTION_STRING).hostname;
+  const url = `https://${host}/sql`;
   const res = await fetch(url, {
     method: 'POST',
     headers: {
