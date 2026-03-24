@@ -270,7 +270,9 @@
   </footer>
 
   <script>
-    const API_URL = '/api/waitlist';
+    // FormSubmit.co — zero account, zero auth, POST endpoint
+    // Sends submissions to agentlaunchpad@proton.me
+    const FORMSUBMIT_URL = 'https://formsubmit.co/ajax/agentlaunchpad@proton.me';
 
     document.getElementById('waitlistForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -313,20 +315,28 @@
       btn.textContent = 'Submitting...';
 
       try {
-        const res = await fetch(API_URL, {
+        const res = await fetch(FORMSUBMIT_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, building_what: buildingWhat, honeypot })
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            email: email,
+            'What are you building?': buildingWhat,
+            _subject: 'New waitlist signup — AgentLaunchpad',
+            _template: 'table'
+          })
         });
 
         const data = await res.json();
 
-        if (res.ok) {
+        if (data.success === 'true' || data.success === true || res.ok) {
           msg.textContent = "You're on the list! We'll reach out when early access opens.";
           msg.className = 'form-message success';
           form.reset();
         } else {
-          msg.textContent = data.error || 'Something went wrong. Please try again.';
+          msg.textContent = data.message || 'Something went wrong. Please try again.';
           msg.className = 'form-message error';
         }
       } catch (err) {
