@@ -286,7 +286,7 @@
 
       // Reset message
       msg.className = 'form-message';
-      msg.style.display = 'none';
+      msg.removeAttribute('style');
 
       // Honeypot check
       if (honeypot) return;
